@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+	<head>
+		<title>IDEMAP</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link href='http://fonts.googleapis.com/css?family=Lato:300,400,700,900' rel='stylesheet' type='text/css'>
+		<link href="style.css" type="text/css" rel="stylesheet">
+	</head>
+
+	<body>
+		<header>
+			<div class="head_sup"></div>
+			<div class="head"></div>
+			<div class="nav"></div>
+		</header>
+		<section id="map">
+			<a href="#" class="toggleTownList"><img src="img/IDEMAP-3D_icon_municipios-2.svg"></a>
+			<div id="viewport">
+				<h3 class="title"></h3>
+				<div id="toolbuttons">
+					<a href="#" id="toolPanButton" class="selected">
+						<span>Mover</span>
+					</a>
+					<a href="#" id="toolRotateButton">
+						<span>Girar</span>
+					</a>
+					<a href="#" id="toolZoomButton">
+						<span>Zoom</span>
+					</a>
+					<a href="#" id="resetCamera">
+						<img src="img/IDEMAP-3D_icon_reiniciar.svg">
+						<span class="noLowRes">Reiniciar vista</span>
+					</a>
+					<a href="#" id="toggleFullscreen">
+						<span class="noLowRes">Pantalla completa</span>
+					</a>
+				</div>
+				<p class="copyright">3D &copy; Diputación de Málaga</p>
+			</div>
+			<div id="townList">
+				<div class="header">
+					<h4>Municipios</h4>
+					<a href="#" class="toggleTownList">
+						<img src="img/IDEMAP-3D_icon_municipios.svg">
+					</a>
+				</div>
+				<ul id="townListSelector">
+					<li><a attr-model="alameda" href="#">Alameda</a></li>
+					<li><a attr-model="almargen" class="selected" href="#">Almargen</a></li>
+					<li><a attr-model="farajan" href="#">Farajan</a></li>
+					<li><a attr-model="sierra_de_yeguas" href="#">Sierra de Yeguas</a></li>
+					<li><a attr-model="yunquera" href="#">Yunquera</a></li>
+				</ul>
+			</div>
+		</section>
+
+		<script src="lib/three.min.js"></script>
+		<script src="lib/controls/MapControls.js"></script>
+
+		<script src="lib/loaders/DDSLoader.js"></script>
+		<script src="lib/loaders/MTLLoader.js"></script>
+		<script src="lib/loaders/OBJMTLLoader.js"></script>
+
+		<script src="lib/shaders/CopyShader.js"></script>
+		<script src="lib/shaders/FXAAShader.js"></script>
+		<script src="lib/shaders/BrightnessContrastShader.js"></script>
+
+		<script src="lib/postprocessing/EffectComposer.js"></script>
+		<script src="lib/postprocessing/RenderPass.js"></script>
+		<script src="lib/postprocessing/MaskPass.js"></script>
+		<script src="lib/postprocessing/ShaderPass.js"></script>
+
+		<script src="lib/Detector.js"></script>
+		<script src="lib/stats.min.js"></script>
+
+		<script src="js/viewport.js"></script>
+		<script>loadModel('almargen');</script> 
+	</body>
+</html>

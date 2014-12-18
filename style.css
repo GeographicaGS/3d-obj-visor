@@ -1,0 +1,238 @@
+* {	padding: 0;	margin: 0; box-sizing: border-box;}
+
+@media (max-width: 800px){
+	.noLowRes {
+		max-width: 0 !important;
+		max-height: 0 !important;
+		margin: 0 !important;
+		overflow: hidden !important;
+	}
+}
+
+body {
+	font-family: 'Lato', sans-serif;
+	background-color: #c0c0c0;
+	color: #fff;
+	margin: 0px;
+	display: -webkit-flex;
+	display: flex;
+	-webkit-flex-direction: column;
+	flex-direction: column;
+	height: 100vh;
+}
+
+header {
+	order: 1;
+}
+
+	header .head_sup {
+		background-color: #FFF;
+		height: 54px;
+	}
+
+	header .head {
+		background-color: #f6a634;
+		height: 112px;
+	}
+
+	header .nav {
+		background-color: #e59326;
+		height: 56px;
+	}
+
+section {
+	display: -webkit-flex;
+	-webkit-order: 2;
+	-webkit-flex-grow: 1;
+	display: flex;
+	order: 2;
+	flex-grow: 1;
+	position: relative;
+}
+
+	section #viewport {
+		-webkit-order: 1;
+		-webkit-flex-grow: 1;
+		order: 1;
+		flex-grow: 1;
+		position: relative;
+	}
+
+		section #viewport canvas {
+			position: absolute;
+			top: 0;
+			left: 0;
+		}
+
+		section #viewport .title {
+			position: absolute;
+			top: 10px;
+			left: 20px;
+			font-size: 30px;
+			font-weight: 300;
+			margin: 0;
+			color: #333;
+			z-index: 1;
+			text-transform: capitalize;
+		}
+
+		section #viewport #toolbuttons {
+			position: absolute;
+			right: 26px;
+			top: 20px;
+			z-index: 1;
+			transition: right .5s ease-in-out;
+		}
+
+			section.collapsed #viewport #toolbuttons {
+				right: 82px;
+			}
+
+				section #viewport #toolbuttons a {
+					color: #fff;
+					background-color: #e59326;
+					font-size: 12px;
+					font-weight: 700;
+					text-transform: uppercase;
+					margin-left: 16px;
+					padding: 5px;
+					border: 1px solid transparent;
+					border-radius: 2px;
+					text-decoration: none;
+				}
+
+					section #viewport #toolbuttons a.selected {
+						color: #e59326;
+						background-color: #fff;
+					}
+
+					section #viewport #toolbuttons a img {
+						vertical-align: sub;
+						position: relative;
+						top: -1px;
+					}
+
+					section #viewport #toolbuttons a span {
+						display: inline-block;
+						margin: 0 5px 0 3px;
+						max-width: 150px;
+						white-space: nowrap;
+						transition: max-width .3s ease-in-out;
+					}
+
+				section #viewport #toolbuttons #toggleFullscreen:before {
+					content: url("img/IDEMAP-3D_icon_maximizar.svg");
+					vertical-align: sub;
+					position: relative;
+					top: -1px;
+				}
+
+				section.fullscreen #viewport #toolbuttons #toggleFullscreen:before {
+					content: url("img/IDEMAP-3D_icon_minimizar.svg");
+				}
+
+		section #viewport .copyright {
+			position: absolute;
+			right: 18px;
+			bottom: 8px;
+			color: #fff;
+			font-size: 11px;
+			margin: 0;
+			z-index: 1;
+		}
+
+	section #townList {
+		-webkit-order : 2;
+		order : 2;
+		width: 264px;
+		max-width: 264px;
+		background-color: #f6f6f6;
+		color: #555;
+		overflow-x: hidden;
+		transition: max-width .3s ease-in-out;
+		z-index: 2;
+	}
+
+		section.collapsed #townList {
+			max-width: 0;
+		}
+
+		section #townList .header {
+			padding: 10px 10px 10px 20px;
+			background-color: #ececec;
+			display: -webkit-flex;
+			-webkit-flex-direction: row;
+			display: flex;
+			flex-direction: row;
+			align-items: flex-end;
+		}
+
+			section #townList .header h4 {
+				font-size: 12px;
+				margin: 0;
+				font-weight: 700;
+				text-transform: uppercase;
+				display: inline-block;
+				-webkit-order: 1;
+				-webkit-flex-grow: 1;
+				order: 1;
+				flex-grow: 1;
+			}
+
+			section #townList .toggleTownList {
+				display: inline-block;
+				float: right;
+				-webkit-order: 2;
+				order: 2;
+			}
+
+				section #townList .toggleTownList img {
+					vertical-align: bottom;
+				}
+
+		section #townList ul li {
+			padding: 9px 20px;
+			border-top: 1px solid #d1d1d1;
+			list-style: none;
+			max-height: 38px;
+		}
+		
+			section #townList ul li a {
+				font-size: 16px;
+				color: inherit;
+				text-decoration: none;
+				white-space: nowrap;
+			}
+
+				section #townList ul li a.selected {
+					font-weight: 900;
+					color: #e59326;
+				}
+
+					section #townList ul li a.selected:before {
+						content: url('img/IDEMAP-3D_icon_seleccion.svg');
+						display: inline-block;
+						vertical-align: middle;
+						margin-right: 9px;
+					}
+
+	section > .toggleTownList {
+		position: absolute;
+		right: 0;
+		top: 6px;
+		z-index: 1;
+
+		color: #fff;
+		background-color: #e59326;
+		font-size: 12px;
+		font-weight: 700;
+		text-transform: uppercase;
+		margin-left: 16px;
+		padding: 5px 9px;
+		border-radius: 2px;
+		text-decoration: none;
+	}
+
+		section > .toggleTownList a img {
+			vertical-align: bottom;
+		}
