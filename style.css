@@ -122,7 +122,11 @@ section {
 			text-transform: capitalize;
 		}
 
-		section #viewport #toolbuttons {
+		section #viewport .toolbuttons {
+			background-color: rgba(255,255,255, .5);
+			border-radius: 2px;
+			padding: 5px;
+
 			position: absolute;
 			right: 26px;
 			top: 20px;
@@ -130,52 +134,161 @@ section {
 			transition: right .5s ease-in-out;
 		}
 
-			section.collapsed #viewport #toolbuttons {
+			section.collapsed #viewport .toolbuttons {
 				right: 82px;
 			}
 
-				section #viewport #toolbuttons a {
-					color: #fff;
-					background-color: #e59326;
-					font-size: 12px;
-					font-weight: 700;
-					text-transform: uppercase;
-					margin-left: 16px;
-					padding: 5px;
-					border: 1px solid transparent;
-					border-radius: 2px;
-					text-decoration: none;
+			section #viewport .toolbuttons a {
+				display: inline-block;
+				color: #fff;
+				background-color: #e59326;
+				font-size: 12px;
+				font-weight: 700;
+				text-transform: uppercase;
+				height: 28px;
+				margin: 5px;
+				padding: 5px;
+				border: 1px solid transparent;
+				border-radius: 2px;
+				text-decoration: none;
+			}
+
+				section #viewport .toolbuttons a.selected {
+					color: #e59326;
+					background-color: #fff;
 				}
 
-					section #viewport #toolbuttons a.selected {
-						color: #e59326;
-						background-color: #fff;
-					}
-
-					section #viewport #toolbuttons a img {
-						vertical-align: sub;
-						position: relative;
-						top: -1px;
-					}
-
-					section #viewport #toolbuttons a span {
-						display: inline-block;
-						margin: 0 5px 0 3px;
-						max-width: 150px;
-						white-space: nowrap;
-						transition: max-width .3s ease-in-out;
-					}
-
-				section #viewport #toolbuttons #toggleFullscreen:before {
-					content: url("img/IDEMAP-3D_icon_maximizar.svg");
-					vertical-align: sub;
+				section #viewport .toolbuttons a img {
+					vertical-align: middle;
 					position: relative;
 					top: -1px;
 				}
 
-				section.fullscreen #viewport #toolbuttons #toggleFullscreen:before {
-					content: url("img/IDEMAP-3D_icon_minimizar.svg");
+				section #viewport .toolbuttons a span {
+					display: inline-block;
+					margin: 0 5px 0 3px;
+					max-width: 150px;
+					white-space: nowrap;
+					transition: max-width .3s ease-in-out;
 				}
+
+			section #viewport .toolbuttons #toggleFullscreen:before {
+				content: url("img/IDEMAP-3D_icon_maximizar.svg");
+				vertical-align: sub;
+			}
+
+			section.fullscreen #viewport .toolbuttons #toggleFullscreen:before {
+				content: url("img/IDEMAP-3D_icon_minimizar.svg");
+			}
+
+
+		section #viewport #cameraToolbuttons {
+			top: 80px;
+			background-color: transparent;
+		}
+
+			section #viewport #cameraToolbuttons .background {
+				background-color: rgba(255,255,255, .5);
+				border-radius: 2px;
+				width: 50px;
+				height: 100%;
+				position: absolute;
+				top: 0;
+				right: 0;
+			}
+
+			section #viewport #cameraToolbuttons a {
+				display: block;
+				height: 30px;
+				padding-right: 23px;
+				max-width: 30px;
+				transition: max-width ease-in-out .5s;
+				overflow: hidden;
+				position: relative;
+			}
+
+				section #viewport #cameraToolbuttons a:after {
+					position: absolute;
+					right: 0;
+					top: 6px;
+					padding-right: 5px;
+					background-color: #e59326;
+				}
+
+					section #viewport #cameraToolbuttons > a.selected:after {
+						background-color: #ffffff;
+					}
+
+			section #viewport #cameraToolbuttons > a span {
+				display: none;
+				position: relative;
+				top: 1px;
+			}
+
+				section #viewport #cameraToolbuttons:hover > a {
+					max-width: 120px;
+				}
+					
+					section #viewport #cameraToolbuttons:hover > a span {
+						display: inline-block;
+					}
+				section #viewport .toolbuttons #toolPanButton:after{
+					content: url('img/IDEMAP-3D_icon_mover-2.svg');
+				}
+
+					section #viewport .toolbuttons #toolPanButton.selected:after{
+						content: url('img/IDEMAP-3D_icon_mover.svg');
+					}
+
+				section #viewport .toolbuttons #toolRotateButton:after{
+					content: url('img/IDEMAP-3D_icon_girar-2.svg');
+					vertical-align: sub;
+				}
+
+					section #viewport .toolbuttons #toolRotateButton.selected:after{
+						content: url('img/IDEMAP-3D_icon_girar.svg');
+					}
+
+				section #viewport .toolbuttons #toolZoomButton:after{
+					content: url('img/IDEMAP-3D_icon_zoom-2.svg');
+					vertical-align: sub;
+				}
+
+					section #viewport .toolbuttons #toolZoomButton.selected:after{
+						content: url('img/IDEMAP-3D_icon_zoom.svg');
+					}
+
+
+		section #viewport #loadingInfo {
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			margin-top: -23px;
+			margin-left: -87px;
+			height: 46px;
+			width: 174px;
+			padding: 2px 8px;
+			border-radius: 2px;
+			background-color: #fff;
+			color: #555;
+			font-size: 16px;
+			z-index: 1;
+			display: none;
+		}
+
+			section #viewport #loadingInfo.show {
+				display: block;
+			}
+
+			section #viewport #loadingInfo img {
+				vertical-align: middle;
+			}
+
+			section #viewport #loadingInfo span {
+				margin: 0 10px 0 2px;
+				position: relative;
+				top: 2px;
+			}
 
 		section #viewport .copyright {
 			position: absolute;

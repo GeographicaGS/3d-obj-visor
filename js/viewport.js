@@ -7,6 +7,7 @@ var ambientLight, objmodel, plane, animationId;
 var composer, brightnessContrastPass, hueSaturationPass, effectFXAA, renderScene, dpr;
 var mouseX = 0, mouseY = 0;
 var parentContainer;
+var loadingInfo;
 
 init();
 
@@ -62,22 +63,22 @@ function load_model(model) {
 	windowHalfX = container.offsetWidth / 2;
 	windowHalfY = container.offsetHeight / 2;
 
-	camera = new THREE.PerspectiveCamera( 60, container.offsetWidth / container.offsetHeight, 1, 4000 );
-	camera.position.z = 200;
+	camera = new THREE.PerspectiveCamera( 60, container.offsetWidth / container.offsetHeight, 1, 7000 );
+	camera.position.set(0, 150, 300);
 
 	controls = new MapControls( camera, container );
 	controls.damping = 0.2;
 
 	// scene
 	scene = new THREE.Scene();
-	scene.fog = new THREE.Fog( 0xc0c0c0, 3800, 4000 );
+	scene.fog = new THREE.Fog( 0xc0c0c0, 6000, 7000 );
 
 	scene.add( camera );
 
 	// Ground
 
 	plane = new THREE.Mesh(
-		new THREE.PlaneBufferGeometry( 10000, 10000 ),
+		new THREE.PlaneBufferGeometry( 20000, 20000 ),
 		new THREE.MeshBasicMaterial({color: 0xa6a6a6})
 	);
 	plane.rotation.x = -Math.PI/2;
@@ -104,9 +105,14 @@ function load_model(model) {
 	var onError = function ( xhr ) {
 	};
 
+	var onLoad = function ( xhr ) {
+		loadingInfo.classList.add('show');
+	};
+
 
 	THREE.Loader.Handlers.add( /\.dds$/i, new THREE.DDSLoader() );
 
+	loadingInfo = document.getElementById('loadingInfo');
 	var loader = new THREE.OBJMTLLoader();
 	loader.load( 'models/'+model+'/'+model+'.obj', 'models/'+model+'/'+model+'.mtl', function ( object ) {
 		objmodel = object;
@@ -118,8 +124,9 @@ function load_model(model) {
 		});
 		scene.add( objmodel );
 		lookAtPos = objmodel.position;
+		loadingInfo.classList.remove('show');
 
-	}, onProgress, onError );
+	}, onLoad, onProgress, onError );
 
 	// renderer
 	renderer = new THREE.WebGLRenderer();
@@ -251,6 +258,8 @@ function changeTool(e) {
 
 	if(!e.eventName){
 		target = e.target.parentNode || e.srcElement.parentNode;
+		if(target.id == 'cameraToolbuttons')
+			target = e.target || e.srcElement;		
 		switch (target.id) {
 			case 'toolPanButton': 	action = controls.setPanMode;
 									break;
@@ -276,7 +285,7 @@ function changeTool(e) {
 	}
 
 	if (target){
-		var selected = document.getElementById('toolbuttons').getElementsByClassName('selected');
+		var selected = document.getElementById('cameraToolbuttons').getElementsByClassName('selected');
 		if (selected.length) selected[0].classList.remove('selected');
 		target.classList.add('selected');
 		action();
