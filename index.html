@@ -28,16 +28,7 @@
 			<a href="#" class="toggleTownList"><img src="img/IDEMAP-3D_icon_municipios-2.svg"></a>
 			<div id="viewport">
 				<h3 class="title"></h3>
-				<div id="toolbuttons">
-					<a href="#" id="toolPanButton" class="selected">
-						<span>Mover</span>
-					</a>
-					<a href="#" id="toolRotateButton">
-						<span>Girar</span>
-					</a>
-					<a href="#" id="toolZoomButton">
-						<span>Zoom</span>
-					</a>
+				<div id="viewToolbuttons" class="toolbuttons">
 					<a href="#" id="resetCamera">
 						<img src="img/IDEMAP-3D_icon_reiniciar.svg">
 						<span class="noLowRes">Reiniciar vista</span>
@@ -45,6 +36,22 @@
 					<a href="#" id="toggleFullscreen">
 						<span class="noLowRes">Pantalla completa</span>
 					</a>
+				</div>
+				<div id="cameraToolbuttons" class="toolbuttons">
+					<div class="background"></div>
+					<a href="#" id="toolPanButton" class="selected" title="Mover">
+						<span>Mover</span>
+					</a>
+					<a href="#" id="toolRotateButton" title="Girar">
+						<span>Girar</span>
+					</a>
+					<a href="#" id="toolZoomButton" title="Zoom">
+						<span>Zoom</span>
+					</a>
+				</div>
+				<div id="loadingInfo">
+					<img src="img/IDEMAP-3D_cargando.gif">
+					<span>Cargando 3D...</span>
 				</div>
 				<p class="copyright">3D &copy; Diputación de Málaga</p>
 			</div>
@@ -75,6 +82,7 @@
 		<script src="lib/shaders/CopyShader.js"></script>
 		<script src="lib/shaders/FXAAShader.js"></script>
 		<script src="lib/shaders/BrightnessContrastShader.js"></script>
+		<script src="lib/shaders/HueSaturationShader.js"></script>
 
 		<script src="lib/postprocessing/EffectComposer.js"></script>
 		<script src="lib/postprocessing/RenderPass.js"></script>

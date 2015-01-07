@@ -3,10 +3,11 @@ var debug = false;
 var container, stats;
 var windowHalfX, windowHalfY;
 var camera, controls, scene, renderer, lookAtPos;
-var hemiLight, pointLight, objmodel, plane, animationId;
-var composer, effectFXAA, renderScene, dpr;
+var ambientLight, objmodel, plane, animationId;
+var composer, brightnessContrastPass, hueSaturationPass, effectFXAA, renderScene, dpr;
 var mouseX = 0, mouseY = 0;
 var parentContainer;
+var loadingInfo;
 
 init();
 
@@ -42,13 +43,9 @@ function load_model(model) {
 		plane.dispose;
 		clearScene(plane);
 	}
-	if (pointLight) {
-		scene.remove(pointLight);
-		pointLight.dispose;
-	}
-	if (hemiLight) {
-		scene.remove(hemiLight);
-		hemiLight.dispose;
+	if (ambientLight) {
+		scene.remove(ambientLight);
+		ambientLight.dispose;
 	}
 	if (camera) {
 		scene.remove(camera);
@@ -56,8 +53,7 @@ function load_model(model) {
 	}
 	objmodel = null;
 	plane = null;
-	pointLight = null;
-	hemiLight = null;
+	ambientLight = null;
     camera = null;
     controls = null;
     scene = null;
@@ -67,25 +63,24 @@ function load_model(model) {
 	windowHalfX = container.offsetWidth / 2;
 	windowHalfY = container.offsetHeight / 2;
 
-	camera = new THREE.PerspectiveCamera( 60, container.offsetWidth / container.offsetHeight, 1, 2000 );
-	camera.position.z = 200;
+	camera = new THREE.PerspectiveCamera( 60, container.offsetWidth / container.offsetHeight, 1, 7000 );
+	camera.position.set(0, 150, 300);
 
 	controls = new MapControls( camera, container );
 	controls.damping = 0.2;
 
 	// scene
 	scene = new THREE.Scene();
-	scene.fog = new THREE.Fog( 0xc0c0c0, 1800, 2000 );
+	scene.fog = new THREE.Fog( 0xc0c0c0, 6000, 7000 );
 
 	scene.add( camera );
 
 	// Ground
 
 	plane = new THREE.Mesh(
-		new THREE.PlaneBufferGeometry( 8000, 8000 ),
-		new THREE.MeshLambertMaterial({color: '#a6a6a6'})
+		new THREE.PlaneBufferGeometry( 20000, 20000 ),
+		new THREE.MeshBasicMaterial({color: 0xa6a6a6})
 	);
-	plane.material.side = THREE.DoubleSide;
 	plane.rotation.x = -Math.PI/2;
 	plane.position.y = -100;
 	scene.add( plane );
@@ -94,11 +89,9 @@ function load_model(model) {
 
 	// lights
 
-	pointLight = new THREE.PointLight(0xffffff, 0);
-	scene.add(pointLight);
+	ambientLight = new THREE.AmbientLight( 0xffffff );
+	scene.add(ambientLight);
 
-	hemiLight = new THREE.HemisphereLight( 0xcccccc, 0xc0c0c0, 1 );
-	scene.add( hemiLight );
 
 	// model
 
@@ -112,9 +105,14 @@ function load_model(model) {
 	var onError = function ( xhr ) {
 	};
 
+	var onLoad = function ( xhr ) {
+		loadingInfo.classList.add('show');
+	};
+
 
 	THREE.Loader.Handlers.add( /\.dds$/i, new THREE.DDSLoader() );
 
+	loadingInfo = document.getElementById('loadingInfo');
 	var loader = new THREE.OBJMTLLoader();
 	loader.load( 'models/'+model+'/'+model+'.obj', 'models/'+model+'/'+model+'.mtl', function ( object ) {
 		objmodel = object;
@@ -126,8 +124,9 @@ function load_model(model) {
 		});
 		scene.add( objmodel );
 		lookAtPos = objmodel.position;
+		loadingInfo.classList.remove('show');
 
-	}, onProgress, onError );
+	}, onLoad, onProgress, onError );
 
 	// renderer
 	renderer = new THREE.WebGLRenderer();
@@ -144,7 +143,10 @@ function load_model(model) {
 	renderScene = new THREE.RenderPass( scene, camera )
 	
 	brightnessContrastPass = new THREE.ShaderPass( THREE.BrightnessContrastShader );
-	brightnessContrastPass.uniforms[ "contrast" ].value = 0.4;
+	brightnessContrastPass.uniforms[ "contrast" ].value = .1;
+	brightnessContrastPass.uniforms[ "brightness" ].value = 0.01;
+	hueSaturationPass = new THREE.ShaderPass( THREE.HueSaturationShader );
+	hueSaturationPass.uniforms[ "saturation" ].value = .25;
 	
 	effectFXAA = new THREE.ShaderPass(THREE.FXAAShader);
 	effectFXAA.uniforms['resolution'].value.set(1 / (window.innerWidth * dpr), 1 / (window.innerHeight * dpr));
@@ -154,6 +156,7 @@ function load_model(model) {
 	composer.setSize(window.innerWidth * dpr, window.innerHeight * dpr);
 	composer.addPass( renderScene );
 	composer.addPass( brightnessContrastPass );
+	composer.addPass( hueSaturationPass );
 	composer.addPass( effectFXAA );
 
 	if(debug){
@@ -210,8 +213,6 @@ function animate() {
 	animationId = requestAnimationFrame( animate );
 	controls.update();
 
-	pointLight.position.set(camera.position.x, camera.position.y, camera.position.z);
-
 	composer.render();
 	if (debug) stats.update();
 
@@ -257,6 +258,8 @@ function changeTool(e) {
 
 	if(!e.eventName){
 		target = e.target.parentNode || e.srcElement.parentNode;
+		if(target.id == 'cameraToolbuttons')
+			target = e.target || e.srcElement;		
 		switch (target.id) {
 			case 'toolPanButton': 	action = controls.setPanMode;
 									break;
@@ -282,7 +285,7 @@ function changeTool(e) {
 	}
 
 	if (target){
-		var selected = document.getElementById('toolbuttons').getElementsByClassName('selected');
+		var selected = document.getElementById('cameraToolbuttons').getElementsByClassName('selected');
 		if (selected.length) selected[0].classList.remove('selected');
 		target.classList.add('selected');
 		action();
