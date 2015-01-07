@@ -355,6 +355,10 @@ section {
 			list-style: none;
 			max-height: 38px;
 		}
+
+			section #townList ul li:last-child {
+				border-bottom: 1px solid #d1d1d1;
+			}
 		
 			section #townList ul li a {
 				font-size: 16px;
