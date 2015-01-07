@@ -282,3 +282,13 @@ section {
 		section > .toggleTownList a img {
 			vertical-align: bottom;
 		}
+
+#panControl {
+	position: absolute;
+	top: 60px;
+	right: 27px;
+	background-color: rgb(8, 118, 215);
+	height: 25px;
+	width: 25px;
+	z-index: 1;
+}
