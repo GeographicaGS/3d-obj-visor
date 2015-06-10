@@ -10,7 +10,17 @@
 
 	<body>
 		<header>
-			<div class="head_sup"></div>
+			<div class="head_sup">
+				<a href="http://www.malaga.es/" target="_blank" class="f_left"><img src="img/dipumalaga_logo.png"></a>
+				<ul class="f_right">
+					<li><a href="http://www.malaga.es/" target="_blank">Temas</a></li>
+					<li><a href="http://www.malaga.es/gobiernoabierto/" target="_blank">Transparencia</a></li>
+					<li><a href="http://www.malaga.es/es/diputacion" target="_blank">La diputación</a></li>
+					<li><a href="http://www.malaga.es/" target="_blank"><img src="img/dipumalaga_buscar.png"></a></li>
+					<li>17° <img src="img/dipumalaga_sol.png"></li>
+					<li><a class="selected" href="http://www.malaga.es/" target="_blank">ES</a> <a href="http://www.malaga.es/en/diputacion" target="_blank">EN</a></li>
+				</ul>
+			</div>
 			<div class="head"></div>
 			<div class="nav"></div>
 		</header>
@@ -18,16 +28,7 @@
 			<a href="#" class="toggleTownList"><img src="img/IDEMAP-3D_icon_municipios-2.svg"></a>
 			<div id="viewport">
 				<h3 class="title"></h3>
-				<div id="toolbuttons">
-					<a href="#" id="toolPanButton" class="selected">
-						<span>Mover</span>
-					</a>
-					<a href="#" id="toolRotateButton">
-						<span>Girar</span>
-					</a>
-					<a href="#" id="toolZoomButton">
-						<span>Zoom</span>
-					</a>
+				<div id="viewToolbuttons" class="toolbuttons">
 					<a href="#" id="resetCamera">
 						<img src="img/IDEMAP-3D_icon_reiniciar.svg">
 						<span class="noLowRes">Reiniciar vista</span>
@@ -35,6 +36,22 @@
 					<a href="#" id="toggleFullscreen">
 						<span class="noLowRes">Pantalla completa</span>
 					</a>
+				</div>
+				<div id="cameraToolbuttons" class="toolbuttons">
+					<div class="background"></div>
+					<a href="#" id="toolPanButton" class="selected" title="Mover">
+						<span>Mover</span>
+					</a>
+					<a href="#" id="toolRotateButton" title="Girar">
+						<span>Girar</span>
+					</a>
+					<a href="#" id="toolZoomButton" title="Zoom">
+						<span>Zoom</span>
+					</a>
+				</div>
+				<div id="loadingInfo">
+					<img src="img/IDEMAP-3D_cargando.gif">
+					<span>Cargando 3D...</span>
 				</div>
 				<p class="copyright">3D &copy; Diputación de Málaga</p>
 			</div>
