@@ -161,7 +161,7 @@ function load_model(model) {
 
 		loadingInfo.classList.remove('show');
 
-	}, onProgress, onError );
+	}, onLoad, onProgress, onError );
 
 	// renderer
 	renderer = new THREE.WebGLRenderer();
@@ -398,5 +398,10 @@ function clearScene(obj){
     if(gui){
     	gui.domElement.remove();
     	delete gui;
+    }
+
+    var canvas = document.getElementsByTagName('canvas');
+    for (var i = 0; i < canvas.length; i++){
+    	canvas[i].parentElement.removeChild(canvas[i]);
     }
 }
