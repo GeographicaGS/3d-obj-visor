@@ -9,6 +9,7 @@ var mouseX = 0, mouseY = 0;
 var parentContainer;
 var gui;
 var collisionPlane;
+var currentTool;
 
 init();
 
@@ -146,6 +147,10 @@ function load_model(model) {
 		lookAtPos = objmodel.position;
 		
 		camera.position.y = boundingBox.max.y + 200;
+
+		if(currentTool){
+			activateTool(currentTool);
+		}
 	}, onProgress, onError );
 
 	// renderer
@@ -302,36 +307,38 @@ function changeTool(e) {
 
 	if(!e.eventName){
 		target = e.target.parentNode || e.srcElement.parentNode;
-		switch (target.id) {
-			case 'toolPanButton': 	action = controls.setPanMode;
-									break;
-			case 'toolRotateButton': 	action = controls.setRotateMode;
-									break;
-			case 'toolZoomButton': 	action = controls.setZoomMode;
-									break;
-		}
 	}else{
 		var targetName;
 		switch (e.eventName){
 			case 'toolPanActivated': 	targetName = 'toolPanButton';
-										action = controls.setPanMode;
 										break;
 			case 'toolRotateActivated': targetName = 'toolRotateButton';
-										action = controls.setRotateMode;
 										break;
-			case 'toolZoomActivated': targetName = 'toolZoomButton';
-										action = controls.setZoomMode;
+			case 'toolZoomActivated': 	targetName = 'toolZoomButton';
 										break;
 		}
 		if (targetName)	target = document.getElementById(targetName);
 	}
 
+	currentTool = target;
+
 	if (target){
-		var selected = document.getElementById('cameraToolbuttons').getElementsByClassName('selected');
-		if (selected.length) selected[0].classList.remove('selected');
-		target.classList.add('selected');
-		action();
+		activateTool(target);
 	}
+}
+
+function activateTool(target) {
+	switch (target.id) {
+		case 'toolPanButton': 	controls.setPanMode();
+								break;
+		case 'toolRotateButton':controls.setRotateMode();
+								break;
+		case 'toolZoomButton': 	controls.setZoomMode();
+								break;
+	}
+	var selected = document.getElementById('cameraToolbuttons').getElementsByClassName('selected');
+	if (selected.length) selected[0].classList.remove('selected');
+	target.classList.add('selected');
 }
 
 function toggleList(e){
