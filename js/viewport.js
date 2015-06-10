@@ -1,13 +1,15 @@
-var debug = false;
+var debug = true;
 
 var container, stats;
 var windowHalfX, windowHalfY;
 var camera, controls, scene, renderer, lookAtPos;
-var ambientLight, objmodel, plane, animationId;
-var composer, brightnessContrastPass, hueSaturationPass, effectFXAA, renderScene, dpr;
+var hemiLight, pointLight, objmodel, plane, animationId;
+var composer, effectFXAA, renderScene, dpr;
 var mouseX = 0, mouseY = 0;
 var parentContainer;
-var loadingInfo;
+var gui;
+var collisionPlane;
+var currentTool;
 
 init();
 
@@ -43,9 +45,13 @@ function load_model(model) {
 		plane.dispose;
 		clearScene(plane);
 	}
-	if (ambientLight) {
-		scene.remove(ambientLight);
-		ambientLight.dispose;
+	if (pointLight) {
+		scene.remove(pointLight);
+		pointLight.dispose;
+	}
+	if (hemiLight) {
+		scene.remove(hemiLight);
+		hemiLight.dispose;
 	}
 	if (camera) {
 		scene.remove(camera);
@@ -53,34 +59,35 @@ function load_model(model) {
 	}
 	objmodel = null;
 	plane = null;
-	ambientLight = null;
+	pointLight = null;
+	hemiLight = null;
     camera = null;
     controls = null;
     scene = null;
+	collidableMeshList = [];
 
 	container = document.getElementById('viewport');
 
 	windowHalfX = container.offsetWidth / 2;
 	windowHalfY = container.offsetHeight / 2;
 
-	camera = new THREE.PerspectiveCamera( 60, container.offsetWidth / container.offsetHeight, 1, 7000 );
-	camera.position.set(0, 150, 300);
-
-	controls = new MapControls( camera, container );
-	controls.damping = 0.2;
+	camera = new THREE.PerspectiveCamera( 60, container.offsetWidth / container.offsetHeight, 1, 2000 );
+	camera.position.z = 200;
 
 	// scene
 	scene = new THREE.Scene();
-	scene.fog = new THREE.Fog( 0xc0c0c0, 6000, 7000 );
-
+	/*scene.fog = new THREE.Fog( 0xA9C0D1, 1800, 2000 ); /*0xAAD1F0*/ /* 0x94B6D1 */
+    scene.fog = new THREE.FogExp2(0xF5F4E0, 0.00075);
+    
 	scene.add( camera );
 
 	// Ground
 
 	plane = new THREE.Mesh(
-		new THREE.PlaneBufferGeometry( 20000, 20000 ),
-		new THREE.MeshBasicMaterial({color: 0xa6a6a6})
+		new THREE.PlaneBufferGeometry( 8000, 8000 ),
+		new THREE.MeshLambertMaterial({color: '#6E7657'})
 	);
+	plane.material.side = THREE.DoubleSide;
 	plane.rotation.x = -Math.PI/2;
 	plane.position.y = -100;
 	scene.add( plane );
@@ -89,9 +96,11 @@ function load_model(model) {
 
 	// lights
 
-	ambientLight = new THREE.AmbientLight( 0xffffff );
-	scene.add(ambientLight);
+	pointLight = new THREE.PointLight(0xffffff, 0);
+	scene.add(pointLight);
 
+	hemiLight = new THREE.HemisphereLight( 0xcccccc, 0xc0c0c0, 1 );
+	scene.add( hemiLight );
 
 	// model
 
@@ -105,14 +114,9 @@ function load_model(model) {
 	var onError = function ( xhr ) {
 	};
 
-	var onLoad = function ( xhr ) {
-		loadingInfo.classList.add('show');
-	};
-
 
 	THREE.Loader.Handlers.add( /\.dds$/i, new THREE.DDSLoader() );
 
-	loadingInfo = document.getElementById('loadingInfo');
 	var loader = new THREE.OBJMTLLoader();
 	loader.load( 'models/'+model+'/'+model+'.obj', 'models/'+model+'/'+model+'.mtl', function ( object ) {
 		objmodel = object;
@@ -123,15 +127,36 @@ function load_model(model) {
     		}
 		});
 		scene.add( objmodel );
-		lookAtPos = objmodel.position;
-		loadingInfo.classList.remove('show');
 
-	}, onLoad, onProgress, onError );
+		// Collision plane
+		var boundingBox=new THREE.Box3().setFromObject( objmodel );
+		var size = boundingBox.size();
+		var center = boundingBox.center();
+		collisionPlane = new THREE.Mesh(
+			new THREE.BoxGeometry( 8000, size.y, 8000 ),
+			new THREE.LineBasicMaterial({color: '#FF0000', transparent: true, opacity: 0})
+		);
+		collisionPlane.material.side = THREE.DoubleSide;
+		collisionPlane.position.set(0, center.y, 0);
+		scene.add( collisionPlane );
+		
+		collidableMeshList.push(collisionPlane);
+
+		controls = new MapControls( camera, container, collidableMeshList );
+		controls.damping = 0.2;
+		lookAtPos = objmodel.position;
+		
+		camera.position.y = boundingBox.max.y + 200;
+
+		if(currentTool){
+			activateTool(currentTool);
+		}
+	}, onProgress, onError );
 
 	// renderer
 	renderer = new THREE.WebGLRenderer();
 	renderer.setSize( container.offsetWidth, container.offsetHeight );
-	renderer.setClearColor( scene.fog.color, 1 );
+	renderer.setClearColor( 0xBDEBFF, 1 ); /* scene.fog.color */
 	container.appendChild( renderer.domElement );
 
 	// postprocessing
@@ -142,10 +167,10 @@ function load_model(model) {
 
 	renderScene = new THREE.RenderPass( scene, camera )
 	
-	brightnessContrastPass = new THREE.ShaderPass( THREE.BrightnessContrastShader );
-	brightnessContrastPass.uniforms[ "contrast" ].value = .1;
+	var brightnessContrastPass = new THREE.ShaderPass( THREE.BrightnessContrastShader );
+	brightnessContrastPass.uniforms[ "contrast" ].value = 0.4;
 	brightnessContrastPass.uniforms[ "brightness" ].value = 0.01;
-	hueSaturationPass = new THREE.ShaderPass( THREE.HueSaturationShader );
+	var hueSaturationPass = new THREE.ShaderPass( THREE.HueSaturationShader );
 	hueSaturationPass.uniforms[ "saturation" ].value = .25;
 	
 	effectFXAA = new THREE.ShaderPass(THREE.FXAAShader);
@@ -166,7 +191,29 @@ function load_model(model) {
 		container.appendChild( stats.domElement );
 	}
 
-	//
+	// Controls
+	var parameters = 
+	{
+		contrast: 0.4,
+		brightness: 0.1,
+		saturation: 0.25
+	};
+
+	gui = new dat.GUI();
+	var filterContrast = gui.add( parameters, 'contrast' ).min(0).max(1).step(0.05).name('Contraste').listen();
+	filterContrast.onChange(function(value){
+		brightnessContrastPass.uniforms[ "contrast" ].value = value;
+	});
+	var filterBrightness = gui.add(parameters, 'brightness').min(0).max(1).step(0.05).name('Brillo').listen();
+	filterBrightness.onChange( function(value){
+		brightnessContrastPass.uniforms["brightness"].value = value;
+	});
+	var filterSaturation = gui.add(parameters, 'saturation').min(0).max(1).step(0.05).name('Saturación').listen();
+	filterSaturation.onChange( function(value){
+		hueSaturationPass.uniforms["saturation"].value = value;
+	});
+
+
 
 	window.addEventListener( 'resize', onWindowResize, false );
 	document.getElementById('resetCamera').addEventListener('click', resetCamera, false);
@@ -181,7 +228,6 @@ function load_model(model) {
 	if(title.length){
 		title[0].innerHTML = model.replace(/_/g, ' ');
 	}
-
 }
 
 function onWindowResize() {
@@ -211,7 +257,10 @@ function onDocumentMouseMove( event ) {
 function animate() {
 
 	animationId = requestAnimationFrame( animate );
-	controls.update();
+	if (controls)
+		controls.update();
+
+	pointLight.position.set(camera.position.x, camera.position.y, camera.position.z);
 
 	composer.render();
 	if (debug) stats.update();
@@ -258,38 +307,38 @@ function changeTool(e) {
 
 	if(!e.eventName){
 		target = e.target.parentNode || e.srcElement.parentNode;
-		if(target.id == 'cameraToolbuttons')
-			target = e.target || e.srcElement;		
-		switch (target.id) {
-			case 'toolPanButton': 	action = controls.setPanMode;
-									break;
-			case 'toolRotateButton': 	action = controls.setRotateMode;
-									break;
-			case 'toolZoomButton': 	action = controls.setZoomMode;
-									break;
-		}
 	}else{
 		var targetName;
 		switch (e.eventName){
 			case 'toolPanActivated': 	targetName = 'toolPanButton';
-										action = controls.setPanMode;
 										break;
 			case 'toolRotateActivated': targetName = 'toolRotateButton';
-										action = controls.setRotateMode;
 										break;
-			case 'toolZoomActivated': targetName = 'toolZoomButton';
-										action = controls.setZoomMode;
+			case 'toolZoomActivated': 	targetName = 'toolZoomButton';
 										break;
 		}
 		if (targetName)	target = document.getElementById(targetName);
 	}
 
+	currentTool = target;
+
 	if (target){
-		var selected = document.getElementById('cameraToolbuttons').getElementsByClassName('selected');
-		if (selected.length) selected[0].classList.remove('selected');
-		target.classList.add('selected');
-		action();
+		activateTool(target);
 	}
+}
+
+function activateTool(target) {
+	switch (target.id) {
+		case 'toolPanButton': 	controls.setPanMode();
+								break;
+		case 'toolRotateButton':controls.setRotateMode();
+								break;
+		case 'toolZoomButton': 	controls.setZoomMode();
+								break;
+	}
+	var selected = document.getElementById('cameraToolbuttons').getElementsByClassName('selected');
+	if (selected.length) selected[0].classList.remove('selected');
+	target.classList.add('selected');
 }
 
 function toggleList(e){
@@ -334,5 +383,10 @@ function clearScene(obj){
                 obj.remove(obj.children[0]);
             }
         }
+    }
+
+    if(gui){
+    	gui.domElement.remove();
+    	delete gui;
     }
 }
