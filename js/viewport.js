@@ -10,6 +10,7 @@ var parentContainer;
 var gui;
 var collisionPlane;
 var currentTool;
+var loadingInfo;
 
 init();
 
@@ -114,8 +115,14 @@ function load_model(model) {
 	var onError = function ( xhr ) {
 	};
 
+	var onLoad = function ( xhr ) {
+		loadingInfo.classList.add('show');
+	};
+
 
 	THREE.Loader.Handlers.add( /\.dds$/i, new THREE.DDSLoader() );
+
+	loadingInfo = document.getElementById('loadingInfo');
 
 	var loader = new THREE.OBJMTLLoader();
 	loader.load( 'models/'+model+'/'+model+'.obj', 'models/'+model+'/'+model+'.mtl', function ( object ) {
@@ -151,6 +158,9 @@ function load_model(model) {
 		if(currentTool){
 			activateTool(currentTool);
 		}
+
+		loadingInfo.classList.remove('show');
+
 	}, onProgress, onError );
 
 	// renderer
