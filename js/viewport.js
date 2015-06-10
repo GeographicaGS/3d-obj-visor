@@ -1,4 +1,4 @@
-var debug = false;
+var debug = true;
 
 var container, stats;
 var windowHalfX, windowHalfY;
@@ -8,7 +8,7 @@ var composer, effectFXAA, renderScene, dpr;
 var mouseX = 0, mouseY = 0;
 var parentContainer;
 var gui;
-var cameraCube, collidableMeshList;
+var collisionPlane;
 
 init();
 
@@ -73,52 +73,12 @@ function load_model(model) {
 	camera = new THREE.PerspectiveCamera( 60, container.offsetWidth / container.offsetHeight, 1, 2000 );
 	camera.position.z = 200;
 
-	// CameraCube
-	cameraCube = new THREE.Mesh(
-		new THREE.CubeGeometry(20,20,20),
-		new THREE.MeshLambertMaterial({color: '#FF0000'})
-	);
-
-	controls = new MapControls( camera, container );
-	controls.damping = 0.2;
-
 	// scene
 	scene = new THREE.Scene();
 	/*scene.fog = new THREE.Fog( 0xA9C0D1, 1800, 2000 ); /*0xAAD1F0*/ /* 0x94B6D1 */
     scene.fog = new THREE.FogExp2(0xF5F4E0, 0.00075);
     
-    // skybox
-    /*var urlPrefix = "../img/";
-    var urls = [
-        urlPrefix + 'px.jpg',
-        urlPrefix + 'nx.jpg',
-        urlPrefix + 'pz.jpg',
-        urlPrefix + 'nz.jpg',
-        urlPrefix + 'py.jpg',
-        urlPrefix + 'ny.jpg'
-    ];
-    var cubemap = THREE.ImageUtils.loadTextureCube(urls);
-    cubemap.format = THREE.RGBFormat;
-    var shader = THREE.ShaderLib['cube']; // init cube shader from built-in lib
-    shader.uniforms['tCube'].value = cubemap; // apply textures to shader
-    // create shader material
-    var skyBoxMaterial = new THREE.ShaderMaterial( {
-        fragmentShader: shader.fragmentShader,
-        vertexShader: shader.vertexShader,
-        uniforms: shader.uniforms,
-        depthWrite: false,
-        side: THREE.BackSide
-    });
-    var skybox = new THREE.Mesh(
-        new THREE.BoxGeometry(1000, 1000, 1000),
-        skyBoxMaterial
-    );
-    scene.add(skybox);*/
-    
 	scene.add( camera );
-
-	cameraCube.position.set(0,0,0);
-	scene.add(cameraCube);
 
 	// Ground
 
@@ -167,14 +127,25 @@ function load_model(model) {
 		});
 		scene.add( objmodel );
 
-		for(var i in objmodel.children){
-			for(var j in objmodel.children[i].children){
-				collidableMeshList.push( objmodel.children[i].children[j] );
-			}
-		}
+		// Collision plane
+		var boundingBox=new THREE.Box3().setFromObject( objmodel );
+		var size = boundingBox.size();
+		var center = boundingBox.center();
+		collisionPlane = new THREE.Mesh(
+			new THREE.BoxGeometry( 8000, size.y, 8000 ),
+			new THREE.LineBasicMaterial({color: '#FF0000', transparent: true, opacity: 0})
+		);
+		collisionPlane.material.side = THREE.DoubleSide;
+		collisionPlane.position.set(0, center.y, 0);
+		scene.add( collisionPlane );
 		
-		lookAtPos = objmodel.position;
+		collidableMeshList.push(collisionPlane);
 
+		controls = new MapControls( camera, container, collidableMeshList );
+		controls.damping = 0.2;
+		lookAtPos = objmodel.position;
+		
+		camera.position.y = boundingBox.max.y + 200;
 	}, onProgress, onError );
 
 	// renderer
@@ -281,37 +252,14 @@ function onDocumentMouseMove( event ) {
 function animate() {
 
 	animationId = requestAnimationFrame( animate );
-	controls.update();
+	if (controls)
+		controls.update();
 
 	pointLight.position.set(camera.position.x, camera.position.y, camera.position.z);
-	cameraCube.position.set(camera.position.x, camera.position.y, camera.position.z);
-	checkCollision();
 
 	composer.render();
 	if (debug) stats.update();
 
-}
-
-function checkCollision() {
-	// collision detection:
-	//   determines if any of the rays from the cube's origin to each vertex
-	//		intersects any face of a mesh in the array of target meshes
-	//   for increased collision accuracy, add more vertices to the cube;
-	//		for example, new THREE.CubeGeometry( 64, 64, 64, 8, 8, 8, wireMaterial )
-	//   HOWEVER: when the origin of the ray is within the target mesh, collisions do not occur
-	var originPoint = cameraCube.position.clone();
-	
-	for (var vertexIndex = 0; vertexIndex < cameraCube.geometry.vertices.length; vertexIndex++)
-	{		
-		var localVertex = cameraCube.geometry.vertices[vertexIndex].clone();
-		var globalVertex = localVertex.applyMatrix4( cameraCube.matrix );
-		var directionVector = globalVertex.sub( cameraCube.position );
-		
-		var ray = new THREE.Raycaster( originPoint, directionVector.clone().normalize() );
-		var collisionResults = ray.intersectObjects( collidableMeshList );
-		if ( collisionResults.length > 0 && collisionResults[0].distance < directionVector.length() ) 
-			console.log(" Hit ");
-	}	
 }
 
 function resetCamera(e) {
